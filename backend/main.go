@@ -8,6 +8,7 @@ import (
 
 	"gotasks/controllers" // Add to imports
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"                  // Web framework for building APIs
 	"go.mongodb.org/mongo-driver/mongo"         // MongoDB driver
 	"go.mongodb.org/mongo-driver/mongo/options" // MongoDB connection options
@@ -51,6 +52,15 @@ func main() {
 
 	// Initialize the default Gin router (includes logger and recovery middleware)
 	router := gin.Default()
+
+	// 💥 CORS middleware here
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// Health check endpoint — hit this to verify the server is running
 	router.GET("/ping", func(c *gin.Context) {
