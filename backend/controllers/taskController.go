@@ -130,6 +130,7 @@ func EditTask(c *gin.Context) {
 		{Key: "$set", Value: bson.D{
 			{Key: "title", Value: updatedTask.Title},
 			{Key: "description", Value: updatedTask.Description},
+			{Key: "completed", Value: updatedTask.Completed},
 		}},
 	}
 

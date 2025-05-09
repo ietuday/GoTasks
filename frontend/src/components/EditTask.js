@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom'; // Updated import
+import { useNavigate, useParams } from 'react-router-dom';
+import './EditTask.css'; // Add this for custom styles
 
 const EditTask = () => {
-  const { id } = useParams(); // Get the task ID from the URL
-  const [task, setTask] = useState({ name: '', description: '' });
-  const navigate = useNavigate(); // Updated to useNavigate()
+  const { id } = useParams();
+  const [task, setTask] = useState({ title: '', description: '', completed: false });
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch the task to edit
     fetch(`http://localhost:8080/tasks/${id}`)
       .then((response) => response.json())
       .then((data) => setTask(data))
@@ -17,45 +17,58 @@ const EditTask = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const updatedTask = { name: task.name, description: task.description };
-
     fetch(`http://localhost:8080/tasks/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedTask),
+      body: JSON.stringify(task),
     })
       .then((response) => response.json())
       .then((data) => {
         console.log('Task updated:', data);
-        navigate('/'); // Redirect to the TaskList page after update
+        navigate('/');
       })
       .catch((error) => console.error('Error updating task:', error));
   };
 
   return (
-    <div>
-      <h2>Edit Task</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Name</label>
+    <div className="edit-task-container">
+      <h2 className="edit-task-title">Edit Task</h2>
+      <form onSubmit={handleSubmit} className="edit-task-form">
+        <div className="form-group">
+          <label htmlFor="title">Task Title</label>
           <input
             type="text"
-            value={task.name}
-            onChange={(e) => setTask({ ...task, name: e.target.value })}
+            id="title"
+            value={task.title}
+            onChange={(e) => setTask({ ...task, title: e.target.value })}
             required
           />
         </div>
-        <div>
-          <label>Description</label>
+
+        <div className="form-group">
+          <label htmlFor="description">Task Description</label>
           <input
             type="text"
+            id="description"
             value={task.description}
             onChange={(e) => setTask({ ...task, description: e.target.value })}
             required
           />
         </div>
-        <button type="submit" className="btn btn-primary">
-          Update Task
+
+        <div className="form-group checkbox-group">
+          <label>
+            <input
+              type="checkbox"
+              checked={task.completed}
+              onChange={(e) => setTask({ ...task, completed: e.target.checked })}
+            />
+            {' '}Mark as Completed
+          </label>
+        </div>
+
+        <button type="submit" className="update-btn">
+          ✅ Update Task
         </button>
       </form>
     </div>
