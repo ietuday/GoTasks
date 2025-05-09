@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import './TaskList.css'; // Add this to include custom styles
 
 const TaskList = () => {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
+
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,24 +35,34 @@ const TaskList = () => {
   };
 
   const handleDelete = (taskId) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      fetch(`http://localhost:8080/tasks/${taskId}`, {
-        method: 'DELETE',
-      })
-        .then((response) => {
-          if (response.ok) {
-            setTasks(tasks.filter(task => task.id !== taskId));
-            alert('Task deleted successfully!');
-          } else {
-            alert('Failed to delete task.');
-          }
-        })
-        .catch((error) => {
-          console.error('Error deleting task:', error);
-          alert('Failed to delete task.');
-        });
-    }
+    setTaskToDelete(taskId);
+    setShowConfirm(true);
   };
+
+  const confirmDelete = () => {
+    fetch(`http://localhost:8080/tasks/${taskToDelete}`, {
+      method: 'DELETE',
+    })
+      .then((response) => {
+        if (response.ok) {
+          setTasks((prev) => prev.filter((task) => task.id !== taskToDelete));
+          setShowConfirm(false);
+          setTaskToDelete(null);
+        } else {
+          alert('Failed to delete task.');
+        }
+      })
+      .catch((error) => {
+        console.error('Error deleting task:', error);
+        alert('Failed to delete task.');
+      });
+  };
+
+  const cancelDelete = () => {
+    setShowConfirm(false);
+    setTaskToDelete(null);
+  };
+
 
   const handleComplete = (taskId) => {
     const updatedTasks = tasks.map((task) =>
@@ -102,6 +115,18 @@ const TaskList = () => {
       >
         Add New Task
       </button>
+      {showConfirm && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Are you sure?</h3>
+            <p>You are about to delete this task. This action is irreversible.</p>
+            <div className="modal-actions">
+              <button onClick={confirmDelete} className="confirm-btn">Yes, Delete</button>
+              <button onClick={cancelDelete} className="cancel-btn">Cancel</button>
+            </div>
+          </div>
+        </div>
+    )}
 
       {Array.isArray(tasks) && tasks.length > 0 ? (
         <table className="task-table">
