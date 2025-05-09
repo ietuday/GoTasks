@@ -6,10 +6,11 @@ import (
 
 	"gotasks/models" // Importing the Task model which defines task data
 
-	"github.com/gin-gonic/gin"                  // Web framework for building RESTful APIs
-	"go.mongodb.org/mongo-driver/bson"          // MongoDB BSON helpers for structuring queries
-	"go.mongodb.org/mongo-driver/mongo"         // MongoDB driver for Go
-	"go.mongodb.org/mongo-driver/mongo/options" // MongoDB connection and query options
+	"github.com/gin-gonic/gin"                   // Web framework for building RESTful APIs
+	"go.mongodb.org/mongo-driver/bson"           // MongoDB BSON helpers for structuring queries
+	"go.mongodb.org/mongo-driver/bson/primitive" // MongoDB BSON primitive types
+	"go.mongodb.org/mongo-driver/mongo"          // MongoDB driver for Go
+	"go.mongodb.org/mongo-driver/mongo/options"  // MongoDB connection and query options
 )
 
 // ✅ Interface with correct variadic method signatures
@@ -18,6 +19,12 @@ import (
 type TaskCollection interface {
 	InsertOne(ctx context.Context, doc interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error)
 	Find(ctx context.Context, filter interface{}, opts ...*options.FindOptions) (*mongo.Cursor, error)
+	// UpdateOne updates a single document in the collection.
+	UpdateOne(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
+	// FindOne retrieves a single document from the collection.
+	FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult
+	// DeleteOne deletes a single document from the collection.
+	DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
 }
 
 // Global variable to hold the injected collection object
@@ -91,4 +98,111 @@ func AddTask(c *gin.Context) {
 	// Successfully added the task, return it with a 201 Created status
 	// This indicates that the task has been successfully created and stored in the database
 	c.JSON(http.StatusCreated, newTask)
+}
+
+// ====================
+// ✏️ EditTask Endpoint
+// ====================
+
+func EditTask(c *gin.Context) {
+	// Extract the task ID from the URL parameter
+	taskID := c.Param("id")
+
+	// Create an empty Task object to bind the incoming JSON data to
+	var updatedTask models.Task
+
+	// Bind the incoming JSON body to the updatedTask struct
+	if err := c.ShouldBindJSON(&updatedTask); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body: " + err.Error()})
+		return
+	}
+
+	// Convert the taskID to an ObjectID (MongoDB-specific)
+	objectID, err := primitive.ObjectIDFromHex(taskID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID format"})
+		return
+	}
+
+	// Prepare the update query
+	filter := bson.D{{Key: "_id", Value: objectID}} // Find the task by its ID
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "title", Value: updatedTask.Title},
+			{Key: "description", Value: updatedTask.Description},
+		}},
+	}
+
+	// Perform the update operation
+	_, err = taskCol.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update task: " + err.Error()})
+		return
+	}
+
+	// Successfully updated the task, return the updated task
+	c.JSON(http.StatusOK, updatedTask)
+}
+
+// ====================
+// 📄 GetTaskDetail Endpoint
+// ====================
+
+func GetTaskDetail(c *gin.Context) {
+	// Extract the task ID from the URL parameter
+	taskID := c.Param("id")
+
+	// Convert the taskID to an ObjectID (MongoDB-specific)
+	objectID, err := primitive.ObjectIDFromHex(taskID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID format"})
+		return
+	}
+
+	// Find the task by its ID
+	var task models.Task
+	err = taskCol.FindOne(context.Background(), bson.D{{Key: "_id", Value: objectID}}).Decode(&task)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch task: " + err.Error()})
+		}
+		return
+	}
+
+	// Successfully retrieved the task, return the task details
+	c.JSON(http.StatusOK, task)
+}
+
+// ====================
+// 🗑️ DeleteTask Endpoint
+// ====================
+
+func DeleteTask(c *gin.Context) {
+	// Extract the task ID from the URL parameter
+	taskID := c.Param("id")
+
+	// Convert the taskID to an ObjectID (MongoDB-specific)
+	objectID, err := primitive.ObjectIDFromHex(taskID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID format"})
+		return
+	}
+
+	// Delete the task by its ID
+	result, err := taskCol.DeleteOne(context.Background(), bson.D{{Key: "_id", Value: objectID}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete task: " + err.Error()})
+		return
+	}
+
+	// If no documents were matched (i.e., task not found)
+	if result.DeletedCount == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+		return
+	}
+
+	// Successfully deleted the task
+	c.JSON(http.StatusOK, gin.H{"message": "Task deleted successfully"})
 }

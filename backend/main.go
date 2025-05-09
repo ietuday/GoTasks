@@ -73,6 +73,9 @@ func main() {
 	// Define routes
 	router.GET("/tasks", controllers.GetTasks)
 	router.POST("/tasks", controllers.AddTask)
+	router.PUT("/tasks/:id", controllers.EditTask)
+	router.DELETE("/tasks/:id", controllers.DeleteTask)
+	router.GET("/tasks/:id", controllers.GetTaskDetail)
 
 	// ========================
 	// 🚀 Start HTTP Server
