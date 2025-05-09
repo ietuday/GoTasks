@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"gotasks/controllers" // Add to imports
+
 	"github.com/gin-gonic/gin"                  // Web framework for building APIs
 	"go.mongodb.org/mongo-driver/mongo"         // MongoDB driver
 	"go.mongodb.org/mongo-driver/mongo/options" // MongoDB connection options
@@ -54,6 +56,13 @@ func main() {
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong from GoTasks"})
 	})
+
+	// Pass collection to controller
+	controllers.InitController(taskCollection)
+
+	// Define routes
+	router.GET("/tasks", controllers.GetTasks)
+	router.POST("/tasks", controllers.AddTask)
 
 	// ========================
 	// 🚀 Start HTTP Server
