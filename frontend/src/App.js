@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 import TaskList from './components/TaskList';
 import AddTask from './components/AddTask';
 import EditTask from './components/EditTask';
+import TaskDetails from './components/Task';
 
 const App = () => {
   return (
@@ -13,6 +14,7 @@ const App = () => {
         <Route path="/" element={<TaskList />} />
         <Route path="/add" element={<AddTask />} />
         <Route path="/edit/:id" element={<EditTask />} />
+        <Route path="/details/:id" element={<TaskDetails />} />
       </Routes>
     </div>
   );

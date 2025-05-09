@@ -27,6 +27,9 @@ const TaskList = () => {
     console.log('Navigate to edit task with id:', taskId);
     navigate(`/edit/${taskId}`); // Navigate to the edit page for the selected task
   };
+  const handleView = (taskId) => {
+    navigate(`/details/${taskId}`);
+  };
 
   const handleDelete = (taskId) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
@@ -123,6 +126,7 @@ const TaskList = () => {
                   />
                 </td>
                 <td className="task-actions">
+                    <button onClick={() => handleView(task.id)} className="view-btn">View</button>
                   <button onClick={() => handleEdit(task.id)} className="edit-btn">Edit</button>
                   <button onClick={() => handleDelete(task.id)} className="delete-btn">Delete</button>
                 </td>

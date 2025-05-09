@@ -134,3 +134,24 @@
 input[type="checkbox"] {
   transform: scale(1.5);
 }
+
+.view-btn {
+  background-color: #17a2b8; /* Teal-ish blue for info */
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  margin-right: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.view-btn:hover {
+  background-color: #138496; /* Slightly darker on hover */
+}
+
+.task-actions {
+  display: flex;
+  gap: 8px;
+}
