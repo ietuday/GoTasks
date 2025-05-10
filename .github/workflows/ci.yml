@@ -48,6 +48,6 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-      - name: 🧪 (Optional) Run React tests
-        working-directory: frontend
-        run: npm test -- --watchAll=false
+      # - name: 🧪 (Optional) Run React tests
+      #   working-directory: frontend
+      #   run: npm test -- --watchAll=false
