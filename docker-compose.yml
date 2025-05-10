@@ -23,10 +23,10 @@ services:
       - ./backend:/app
 
   frontend:
-    container_name: gotasks-frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
+    container_name: gotasks-frontend
     restart: always
     ports:
       - "3000:3000"
@@ -35,5 +35,6 @@ services:
       - /app/node_modules
     stdin_open: true
     tty: true
-    environment:
-      - CHOKIDAR_USEPOLLING=true
+
+volumes:
+  mongo-data:

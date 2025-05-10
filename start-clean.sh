@@ -9,14 +9,20 @@ docker-compose down --volumes --remove-orphans
 echo "🗑️ Removing dangling Docker images..."
 docker image prune -f
 
-# Remove all unused volumes
+# Remove unused volumes
 echo "🧼 Removing unused Docker volumes..."
 docker volume prune -f
 
-# Optionally remove all images built (uncomment if needed)
+# Optional full wipe: Uncomment to remove **all** images
 # echo "🔥 Removing all Docker images (use with caution!)"
-# docker rmi $(docker images -q) -f
+# docker rmi -f $(docker images -q)
 
+# Optional: Remove build cache to ensure clean rebuild
+echo "🧽 Cleaning up Docker build cache..."
+docker builder prune -af
+
+# Rebuild and restart
 echo "📦 Building and starting fresh containers..."
 docker-compose up --build --force-recreate
+
 echo "🚀 Docker environment is clean and running!"
