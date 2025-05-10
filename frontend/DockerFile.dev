@@ -1,0 +1,17 @@
+# Use Node LTS
+FROM node:18
+
+# Set working directory
+WORKDIR /app
+
+# Copy only package.json and lock to install deps first
+COPY package*.json ./
+
+# Install deps
+RUN npm install
+
+# Copy source code (in docker-compose, overridden by volume)
+COPY . .
+
+# Start dev server
+CMD ["npm", "start"]
