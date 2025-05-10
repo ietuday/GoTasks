@@ -20,7 +20,7 @@ const AddTask = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log('Task added:', data);
-        navigate('/'); // Redirect to the Task List page after adding a task
+        navigate('/task'); // Redirect to the Task List page after adding a task
       })
       .catch((error) => console.error('Error adding task:', error));
   };
