@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"gotasks/controllers" // Add to imports
+	"gotasks/routes"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"                  // Web framework for building APIs
@@ -45,6 +46,7 @@ func main() {
 
 	// Access the database "gotasksdb" and the collection "tasks"
 	taskCollection = client.Database("gotasksdb").Collection("tasks")
+	userCollection := client.Database("gotasks").Collection("users")
 
 	// ========================
 	// 🌐 Set up Gin Web Server
@@ -66,6 +68,9 @@ func main() {
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong from GoTasks"})
 	})
+	// Middleware for logging and recovery
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
 
 	// Pass collection to controller
 	controllers.InitController(taskCollection)
@@ -76,6 +81,7 @@ func main() {
 	router.PUT("/tasks/:id", controllers.EditTask)
 	router.DELETE("/tasks/:id", controllers.DeleteTask)
 	router.GET("/tasks/:id", controllers.GetTaskDetail)
+	routes.RegisterAuthRoutes(router.Group("/api/auth"), userCollection)
 
 	// ========================
 	// 🚀 Start HTTP Server
