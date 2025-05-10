@@ -58,3 +58,51 @@ A: Volumes are managed by Docker and are ideal for persistent data. Bind mounts 
 **Q: How does React’s reconciliation work?**  
 A: React uses a diffing algorithm to compare the new Virtual DOM with the previous one and updates only what's changed in the actual DOM.
 
+### How do you handle dependency injection in Go?
+
+Go doesn’t have a built-in DI framework like Java or C#. Instead, you pass dependencies explicitly via constructors (manual injection), often using interfaces for flexibility. Libraries like `wire` (Google) or `fx` (Uber) can help automate it, but many Go devs prefer the simplicity of keeping DI manual and transparent.
+
+### What’s the difference between `map` and `slice` in Go?
+
+A `slice` is an ordered, resizable sequence of elements—think dynamic array. A `map` is an unordered collection of key-value pairs. Slices preserve order and are index-accessible, maps allow fast key lookups. Slices are useful for lists; maps are best when you need associations (like a dictionary).
+
+### Explain the difference between `nil` interface and interface with nil concrete value in Go.
+
+A `nil` interface is literally zero—it holds no type and no value. But an interface that holds a concrete type with a nil value is **not** nil. This subtle difference can lead to bugs in error handling or logging. Always check both type and value when comparing interfaces to nil.
+
+### How does `React.memo` improve performance?
+
+`React.memo` is a higher-order component that memoizes the result. It skips re-rendering a component if props haven’t changed. It’s useful for pure functional components that don’t need to re-render on every parent change. Add a custom comparison function if shallow comparison isn’t enough.
+
+### What's the role of `key` in React lists?
+
+The `key` helps React identify which items in a list have changed, been added, or removed. It must be unique among siblings. Using `index` as a key is discouraged unless list items are static, because it breaks identity and can cause bugs in component state or animations.
+
+### How does Docker handle networking between containers?
+
+Docker sets up a default bridge network. Containers on the same network can reach each other via container names. You can also define custom user-defined bridge networks in `docker-compose`, which offer DNS-based discovery and better isolation. For external access, ports are published to the host.
+
+### What’s the difference between `CMD` and `ENTRYPOINT` in Docker?
+
+Both define the default command for a container. `CMD` provides default arguments that can be overridden. `ENTRYPOINT` defines the executable. Used together, they form a command: `ENTRYPOINT` + `CMD`. Use `ENTRYPOINT` for fixed behavior and `CMD` for default args (like a config file or mode).
+
+### What are Go's zero values?
+
+Go gives default zero values to variables that aren't explicitly initialized. For example, `int` is `0`, `string` is `""`, `bool` is `false`, and pointers/interfaces are `nil`. This makes it safe to use uninitialized variables but requires awareness to avoid bugs from assuming something was set.
+
+### Explain reconciliation in React.
+
+Reconciliation is React’s diffing algorithm for comparing the previous virtual DOM with the new one. It tries to minimize DOM mutations. If a node has the same type and key, it updates props. If not, it removes and re-adds. Keys play a vital role in minimizing unnecessary DOM changes.
+
+### How do you reduce image size in Docker?
+
+1. Use smaller base images (e.g., `alpine`).
+2. Use multistage builds.
+3. Clean up temporary files and package caches.
+4. Avoid unnecessary dependencies.
+5. Combine `RUN` steps to reduce layers.
+
+Example:
+```dockerfile
+RUN apt-get update && apt-get install -y curl \
+ && rm -rf /var/lib/apt/lists/*
